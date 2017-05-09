@@ -91,6 +91,8 @@ void *multMatriz(Matriz *m1, Matriz *m2, Matriz *out){
 
     int i, j, k, aux;
 
+    aux = 0;
+
     for (i=0; i < m1->tam; i++) {
         for (j=0; j < m1->tam; j++) {
             for (k=0; k < m2->tam; k++) {
@@ -101,7 +103,7 @@ void *multMatriz(Matriz *m1, Matriz *m2, Matriz *out){
     }
 }
 
-void *multMatrizPthread(int me_no, int noproc, int n, Matriz *m1, Matriz *m2, Matriz *out){
+void *multMatrizPthread_WORKING(int me_no, int noproc, int n, Matriz *m1, Matriz *m2, Matriz *out){
 
     int i, j, k, aux;
 
@@ -116,6 +118,25 @@ void *multMatrizPthread(int me_no, int noproc, int n, Matriz *m1, Matriz *m2, Ma
             setElem(out, i, j, aux);
         }
         i += noproc;
+    }
+}
+
+void *multMatrizPthread(int me_no, int noproc, int n, Matriz *m1, Matriz *m2, Matriz *out){
+
+    int i, j, k, aux;
+
+    /*i = me_no;*/
+
+    aux = 0;
+
+    for (i = me_no; i < n; i += noproc){
+        for (j=0; j < n; j++) {
+            /*aux = 0;*/
+            for (k=0; k < n; k++) {
+                aux = getElem(out, i, j) + (getElem(m1, i, k) * getElem(m2, k, j));
+                setElem(out, i, j, aux);
+            }   
+        }
     }
 }
 
@@ -189,13 +210,13 @@ int main(int argc, char *argv[]){
 
     // SEQUENCIAL
 
-    multMatriz(matA, matB, matSaida);
+    /*multMatriz(matA, matB, matSaida);*/
 
     // FIM SEQUENCIAL
 
     // PARALELO
 
-    /*for (i = 0; i < n; i++){
+    for (i = 0; i < n; i++){
         arg[i].id = i;
         arg[i].noproc = n;
         arg[i].dim = ndim;
@@ -207,7 +228,7 @@ int main(int argc, char *argv[]){
 
     for (i = 0; i < n; i++){
         pthread_join(threads[i],NULL);
-    }*/
+    }
     
     // FIM PARALELO
 
