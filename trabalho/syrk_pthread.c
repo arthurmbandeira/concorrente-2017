@@ -83,21 +83,27 @@ typedef struct {
 
 
 static
-void kernel_parallel_syrk(int id, int ni, int nj, int noproc,
+void kernel_parallel_syrk(int id, int ni, int nj, int n,
      DATA_TYPE alpha,
      DATA_TYPE beta)
 {
   int i, j, k;
 
+  int data_division = ni/n;
+
+  int start = data_division * id;
+  int end = data_division * (id + 1);
+
+
 #pragma scop
   /*  C := alpha*A*A' + beta*C */
-  for (i = id; i < ni; i+=noproc)
-    for (j = 0; j < nj; j++)
+  for (i = start; i < end; i++)
+    for (j = 0; j < ni; j++)
       C_copy[i][j] *= beta;
 
   pthread_barrier_wait(&barrier);
   
-  for (i = id; i < ni; i+=noproc)
+  for (i = start; i < end; i++)
     for (j = 0; j < ni; j++)
       for (k = 0; k < nj; k++)
         C_copy[i][j] += alpha * A_copy[i][k] * A_copy[j][k];
