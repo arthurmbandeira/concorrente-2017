@@ -42,7 +42,7 @@ void init_array(int ni, int nj,
   C_copy = (DATA_TYPE **)malloc(ni*sizeof(DATA_TYPE));
 
   for (i = 0; i < ni; i++){
-    A_copy[i] = (DATA_TYPE *)malloc(ni*sizeof(DATA_TYPE));
+    A_copy[i] = (DATA_TYPE *)malloc(nj*sizeof(DATA_TYPE));
     for (j = 0; j < nj; j++){
       A[i][j] = ((DATA_TYPE) i*j) / ni;
       A_copy[i][j] = ((DATA_TYPE) i*j) / ni;
@@ -68,7 +68,7 @@ void print_array(int ni,
 
   for (i = 0; i < ni; i++)
     for (j = 0; j < ni; j++) {
-	fprintf (stderr, DATA_PRINTF_MODIFIER, C[i][j]);
+	fprintf (stderr, DATA_PRINTF_MODIFIER, C_copy[i][j]);
 	if ((i * ni + j) % 20 == 0) fprintf (stderr, "\n");
     }
   fprintf (stderr, "\n");
