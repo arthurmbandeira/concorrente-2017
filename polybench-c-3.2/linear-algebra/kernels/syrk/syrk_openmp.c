@@ -77,8 +77,6 @@ void kernel_syrk(int ni, int nj,
       for (i = 0; i < _PB_NI; i++)
         for (j = 0; j < _PB_NI; j++)
           C[i][j] *= beta;
-
-  /*#pragma omp barrier*/
   
   #pragma omp for private(j, k)
     for (i = 0; i < _PB_NI; i++)

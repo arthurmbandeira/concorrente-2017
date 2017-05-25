@@ -76,20 +76,20 @@ void print_array(int ni,
 
 typedef struct {
     int id;
-    int ni, nj, noproc;
+    int ni, nj, num_threads;
     DATA_TYPE alpha;
     DATA_TYPE beta;
-} parm;
+} parg;
 
 
 static
-void kernel_parallel_syrk(int id, int ni, int nj, int n,
+void kernel_parallel_syrk(int id, int ni, int nj, int num_threads,
      DATA_TYPE alpha,
      DATA_TYPE beta)
 {
   int i, j, k;
 
-  int data_division = ni/n;
+  int data_division = ni/num_threads;
 
   int start = data_division * id;
   int end = data_division * (id + 1);
@@ -139,9 +139,9 @@ void kernel_syrk(int ni, int nj,
 }
 
 void * worker(void *arg){
-    parm *p = (parm *) arg;
+    parg *p = (parg *) arg;
     kernel_parallel_syrk(p->id, p->ni, p->nj,
-                         p->noproc, p->alpha, p->beta);
+                         p->num_threads, p->alpha, p->beta);
     return NULL;
 }
 
@@ -192,12 +192,12 @@ int main(int argc, char** argv)
   pthread_t *threads;
   pthread_attr_t pthread_custom_attr;
 
-  parm *arg;
+  parg *arg;
 
   threads = (pthread_t *)malloc(n*sizeof(*threads));
   pthread_attr_init(&pthread_custom_attr);
 
-  arg = (parm *)malloc(sizeof(parm)*n);
+  arg = (parg *)malloc(sizeof(parg)*n);
 
   pthread_barrier_init(&barrier, NULL, n + 1);
 
@@ -208,7 +208,7 @@ int main(int argc, char** argv)
     arg[i].id = i;
     arg[i].ni = NI;
     arg[i].nj = NJ;
-    arg[i].noproc = n;
+    arg[i].num_threads = n;
     arg[i].alpha = alpha;
     arg[i].beta = beta;
     pthread_create(&threads[i], &pthread_custom_attr, worker, (void *)(arg+i));
