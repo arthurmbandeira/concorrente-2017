@@ -1,8 +1,8 @@
 #!/bin/bash
 
 printf "Automatizando o trabalho de Programação Concorrente"
-gcc -O3 -I utilities -I linear-algebra/kernels/syrk utilities/polybench.c linear-algebra/kernels/syrk/syrk.c -pthread -DMINI_DATASET -DPOLYBENCH_TIME -o syrk
-gcc -O3 -I utilities -I linear-algebra/kernels/syrk utilities/polybench.c linear-algebra/kernels/syrk/syrk_pthread.c -pthread -DMINI_DATASET -DPOLYBENCH_TIME -o syrk_pthread
+gcc -O3 -I utilities -I linear-algebra/kernels/syrk utilities/polybench.c linear-algebra/kernels/syrk/syrk.c -pthread -DXXL_DATASET -DPOLYBENCH_TIME -o syrk
+gcc -O3 -I utilities -I linear-algebra/kernels/syrk utilities/polybench.c linear-algebra/kernels/syrk/syrk_pthread.c -pthread -DXXL_DATASET -DPOLYBENCH_TIME -o syrk_pthread
 
 for i in 01 02 03 04 05 06 07 08 09 10 11; do
 

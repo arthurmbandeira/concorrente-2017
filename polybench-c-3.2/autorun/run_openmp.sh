@@ -1,6 +1,6 @@
 #!/bin/bash
 
-printf "Automatizando o trabalho de Concorrente"
+printf "Automatizando o trabalho de Programação Concorrente"
 gcc -O3 -I utilities -I linear-algebra/kernels/syrk utilities/polybench.c linear-algebra/kernels/syrk/syrk_openmp.c -fopenmp -DXXL_DATASET -DPOLYBENCH_TIME -o syrk_openmp
 
 for i in 01 02 03 04 05 06 07 08 09 10 11; do
