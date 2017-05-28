@@ -1,0 +1,14 @@
+# started on Thu May 25 11:10:19 2017
+
+
+ Performance counter stats for './syrk_pthread 4':
+
+ 2.388.160.894.692      cycles                                                      
+ 4.100.659.324.008      instructions              #    1,72  insns per cycle        
+     5.840.892.854      cache-misses                                                
+    1536295,618532      cpu-clock (msec)                                            
+            20.257      context-switches                                            
+               881      cpu-migrations                                              
+
+     387,005908850 seconds time elapsed
+

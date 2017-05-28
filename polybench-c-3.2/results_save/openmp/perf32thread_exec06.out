@@ -1,0 +1,14 @@
+# started on Sat May 20 23:35:31 2017
+
+
+ Performance counter stats for './syrk_openmp_perf':
+
+ 5.371.606.207.204      cycles                                                      
+ 4.103.262.029.311      instructions              #    0,76  insns per cycle        
+     6.062.999.473      cache-misses                                                
+    3590896,081119      cpu-clock (msec)                                            
+           530.412      context-switches                                            
+             8.660      cpu-migrations                                              
+
+     457,562414066 seconds time elapsed
+

@@ -1,0 +1,14 @@
+# started on Thu May 25 08:47:48 2017
+
+
+ Performance counter stats for './syrk_pthread 32':
+
+ 5.367.960.735.159      cycles                                                      
+ 4.103.895.632.135      instructions              #    0,76  insns per cycle        
+     5.838.836.223      cache-misses                                                
+    3376768,193162      cpu-clock (msec)                                            
+           527.432      context-switches                                            
+             8.690      cpu-migrations                                              
+
+     432,627542670 seconds time elapsed
+

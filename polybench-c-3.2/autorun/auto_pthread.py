@@ -13,6 +13,11 @@ time_16thread = []
 time_32thread = []
 
 perf01thread = []
+perf02thread = []
+perf04thread = []
+perf08thread = []
+perf16thread = []
+perf32thread = []
 
 for i in results:
     if 'exec01' in i:

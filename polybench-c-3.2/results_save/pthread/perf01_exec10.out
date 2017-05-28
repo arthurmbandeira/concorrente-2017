@@ -1,0 +1,14 @@
+# started on Thu May 25 10:39:53 2017
+
+
+ Performance counter stats for './syrk':
+
+ 1.788.888.117.884      cycles                                                      
+ 4.098.799.643.070      instructions              #    2,29  insns per cycle        
+     5.580.836.388      cache-misses                                                
+    1217273,975995      cpu-clock (msec)                                            
+             2.740      context-switches                                            
+                14      cpu-migrations                                              
+
+    1217,470597270 seconds time elapsed
+
