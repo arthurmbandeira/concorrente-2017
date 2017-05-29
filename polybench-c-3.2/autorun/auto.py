@@ -110,24 +110,35 @@ def execAverage(l):
 
 def writeTimeResults(path, name):
     time_avg = OrderedDict()
+    efficiency = OrderedDict()
     tS = execAverage(time_01thread)
     time_avg[1] = tS / tS
+    efficiency[1] = time_avg[1] / 1.0
     time_avg[2] = tS / execAverage(time_02thread)
+    efficiency[2] = time_avg[2] / 2.0
     time_avg[4] = tS / execAverage(time_04thread)
+    efficiency[4] = time_avg[4] / 4.0
     time_avg[8] = tS / execAverage(time_08thread)
+    efficiency[8] = time_avg[8] / 8.0
     time_avg[16] = tS / execAverage(time_16thread)
+    efficiency[16] = time_avg[16] / 16.0
     time_avg[32] = tS / execAverage(time_32thread)
+    efficiency[32] = time_avg[32] / 32.0
 
     try:
         f = open(os.path.join(path, name), 'w')
+        g = open(os.path.join(path, 'efficiency.out'), 'w')
     except IOError:
         os.makedirs(path)
         f = open(os.path.join(path, name), 'w')
+        g = open(os.path.join(path, 'efficiency.out'), 'w')
 
     for i, k in time_avg.items():
         f.write(str(i) + ' ' + str(k) + '\n')
+        g.write(str(i) + ' ' + str(efficiency[i]) + '\n')
 
     f.close()
+    g.close()
 
 def writePerfResults(d, path, name):
     perf_avg = OrderedDict()
@@ -143,7 +154,6 @@ def writePerfResults(d, path, name):
         f.write(str(i) + ' ' + str(perf_avg[i]) + '\n')
 
     f.close()
-
 
 appendResultsTime(results_folder, results_name)
 writeTimeResults(path_gnuplot, 'time.out')

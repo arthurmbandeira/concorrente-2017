@@ -4,11 +4,12 @@ set xlabel "Threads"
 set ylabel "Speedup"
 set xtics 0,2,32
 set ytics 0,2,32
+set grid ytics lc rgb "#505050"
 
-set title 'Syrk Speedup Compared to Developed Sequential'
+# set title 'Speedup Syrk'
 
 set output './results/outputs_gnuplot/speedup.png'
 f(x)=x
 plot f(x) dashtype 30 title 'Ideal', \
- "./results/inputs_gnuplot/input_time.dat" using 1:2 title 'OpenMP' with lines, \
- "./results/inputs_gnuplot/input_time_pthread.dat" using 1:2 title 'Pthread' with lines
+ "./results/openmp_gnuplot/time.out" using 1:2 title 'OpenMP' with lines, \
+ "./results/pthread_gnuplot/time.out" using 1:2 title 'Pthread' with lines

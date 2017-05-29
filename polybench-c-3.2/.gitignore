@@ -2,4 +2,3 @@ syrk_pthread
 syrk_openmp
 syrk
 /results
-/results_save

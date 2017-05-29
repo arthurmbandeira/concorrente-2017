@@ -27,4 +27,4 @@ perf stat -e cycles,instructions,cache-misses,cpu-clock,context-switches,cpu-mig
 done
 
 cd autorun
-python auto_pthread.py
+python auto.py results/openmp/ results/openmp_gnuplot
