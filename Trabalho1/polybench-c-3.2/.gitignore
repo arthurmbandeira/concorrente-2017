@@ -1,4 +1,6 @@
 syrk_pthread
 syrk_openmp
 syrk
+syrk_mpi
+syrk_ref
 /results
