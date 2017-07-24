@@ -213,6 +213,8 @@ int main(int argc, char** argv)
 //        c[NI][NJ];           /* result matrix C */
 MPI_Status status;
 
+
+
 MPI_Init(&argc,&argv);
 MPI_Comm_rank(MPI_COMM_WORLD,&taskid);
 MPI_Comm_size(MPI_COMM_WORLD,&numtasks);
@@ -228,8 +230,10 @@ init_array (ni, nj, &alpha, &beta);
 
   if (taskid == MASTER)
    {
-      printf("syrk_mpi has started with %d tasks.\n",numtasks);
-      printf("Initializing arrays...\n");
+
+    polybench_start_instruments;
+      // printf("syrk_mpi has started with %d tasks.\n",numtasks);
+      // printf("Initializing arrays...\n");
       // print_array(NI);
 
       /* Send matrix data to the worker tasks */
@@ -255,7 +259,7 @@ init_array (ni, nj, &alpha, &beta);
       {
           /*printf("varios\n");*/
          rows = (dest <= extra) ? averow+1 : averow;    
-         printf("Sending %d rows to task %d offset=%d\n", rows, dest, offset);
+         // printf("Sending %d rows to task %d offset=%d\n", rows, dest, offset);
 
          MPI_Send(&offset, 1, MPI_INT, dest, mtype, MPI_COMM_WORLD);
          MPI_Send(&rows, 1, MPI_INT, dest, mtype, MPI_COMM_WORLD);
@@ -317,7 +321,7 @@ init_array (ni, nj, &alpha, &beta);
       }
       printf("\n******************************************************\n");
       printf ("Done.\n");*/
-      print_array(NI);
+      // print_array(NI);
       
    }
 
@@ -402,20 +406,27 @@ init_array (ni, nj, &alpha, &beta);
       MPI_Send(&rows, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);*/
       /*MPI_Send(&C, rows*NJ, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);*/
    }
+
+
+   if (taskid == MASTER) {
+     polybench_stop_instruments;
+     polybench_print_instruments;
+   }
+
    MPI_Finalize();
 
 
 
 
   /* Start timer. */
-  polybench_start_instruments;
+  // polybench_start_instruments;
 
   /* Run kernel. */
   /*kernel_syrk (ni, nj, alpha, beta, POLYBENCH_ARRAY(C), POLYBENCH_ARRAY(A));*/
 
   /* Stop and print timer. */
-  polybench_stop_instruments;
-  polybench_print_instruments;
+  // polybench_stop_instruments;
+  // polybench_print_instruments;
 
 
 
