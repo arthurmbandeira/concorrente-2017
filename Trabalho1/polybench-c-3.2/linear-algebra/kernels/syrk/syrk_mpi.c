@@ -42,7 +42,7 @@ void setElem(Matriz *mat, int lin, int col, DATA_TYPE val){
     mat->elementos[lin*mat->tam + col] = val;
 }
 
-Matriz *A, *C, *C_copy;
+Matriz *A, *A_copy, *C, *C_copy, *C_copy2;
 
 
 /* Array initialization. */
@@ -100,15 +100,12 @@ Matriz *A, *C, *C_copy;
 // }
 
 static
-void init_array(int ni, int nj, DATA_TYPE *alpha, DATA_TYPE *beta) {
+void init_array_master(int ni, int nj, DATA_TYPE *alpha, DATA_TYPE *beta) {
   int i, j;
 
   *alpha = 32412;
   *beta = 2123;
 
-  // A = (DATA_TYPE **)malloc(ni*sizeof(DATA_TYPE));
-  // B_copy = (DATA_TYPE **)malloc(ni*sizeof(DATA_TYPE));
-  // C_copy = (DATA_TYPE **)malloc(ni*sizeof(DATA_TYPE));
   A = novaMatriz(ni);
   C = novaMatriz(ni);
   C_copy = novaMatriz(ni);
@@ -118,6 +115,7 @@ void init_array(int ni, int nj, DATA_TYPE *alpha, DATA_TYPE *beta) {
       setElem(A, i, j, (((DATA_TYPE) i*j) / ni));
     }
   }
+
   for (i = 0; i < ni; i++){
     for (j = 0; j < ni; j++){
       setElem(C, i, j, (((DATA_TYPE) i*j) / ni));
@@ -125,6 +123,25 @@ void init_array(int ni, int nj, DATA_TYPE *alpha, DATA_TYPE *beta) {
     }
   }
 }
+
+
+// static
+// void init_array_slave(int ni, int nj, DATA_TYPE *alpha, DATA_TYPE *beta) {
+//   int i, j;
+
+//   *alpha = 32412;
+//   *beta = 2123;
+
+//   C = novaMatriz(ni);
+//   C_copy = novaMatriz(ni);
+
+//   for (i = 0; i < ni; i++){
+//     for (j = 0; j < ni; j++){
+//       setElem(C, i, j, (((DATA_TYPE) i*j) / ni));
+//       setElem(C_copy, i, j, (((DATA_TYPE) i*j) / ni));
+//     }
+//   }
+// }
 
 
 /* DCE code. Must scan the entire live-out data.
@@ -225,16 +242,16 @@ if (numtasks < 2 ) {
   }
 numworkers = numtasks-1;
 
-init_array (ni, nj, &alpha, &beta);
+// init_array (ni, nj, &alpha, &beta);
 
 
-  if (taskid == MASTER)
-   {
+  if (taskid == MASTER){
 
     polybench_start_instruments;
       // printf("syrk_mpi has started with %d tasks.\n",numtasks);
       // printf("Initializing arrays...\n");
       // print_array(NI);
+     init_array_master(ni, nj, &alpha, &beta);
 
       /* Send matrix data to the worker tasks */
       averow = NI/numworkers;
@@ -268,7 +285,7 @@ init_array (ni, nj, &alpha, &beta);
          // double *d1 = getElem(A, offset, 0);
          // double *d1 = &A->elementos[offset*A->tam];
          // mat->elementos[lin*mat->tam + col];
-         // MPI_Send(d1, rows*NI, MPI_DOUBLE, dest, mtype, MPI_COMM_WORLD);
+         MPI_Send(&A->elementos[0], NI*NI, MPI_DOUBLE, dest, mtype, MPI_COMM_WORLD);
          // printf("ok\n");
          // double d2 = getElem(B_copy, 0, 0);
          // MPI_Send(&d2, NI*NI, MPI_DOUBLE, dest, mtype, MPI_COMM_WORLD);
@@ -328,30 +345,42 @@ init_array (ni, nj, &alpha, &beta);
 
    if (taskid > MASTER)
    {
+        
+      A_copy = novaMatriz(ni);
+      C_copy2 = novaMatriz(ni);
+
+
       mtype = FROM_MASTER;
+
       MPI_Recv(&offset, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD, &status);
       MPI_Recv(&rows, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD, &status);
       // printf("%p\n", A);
-      // MPI_Recv(A->elementos, rows*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
+      MPI_Recv(&A_copy->elementos[0], NI*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
       // MPI_Recv(&B_copy, NI*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
 
       // printf("%d %d\n", rows, offset);
       // printf("%d %d\n", taskid, NI);
       // for (i = 0; i < rows; i++){
       //   for (j = 0; j < NI; j++){
-      //     printf("%lf ", getElem(A, i, j));
+      //     printf("%lf ", getElem(A_copy, i, j));
       //   }
       // }
 
+
+      // printf("matriz recebida \n");
+
       for (i = offset; i < rows + offset; i++){
+        // printf("%d\n", i);
         for (j = 0; j < NI; j++){
-          setElem(C_copy, i, j, 0.0);
+          setElem(C_copy2, i, j, 0.0);
           for (k = 0; k < NI; k++){
-            setElem(C_copy, i, j, getElem(C_copy, i, j) + getElem(A, i, k) * getElem(A, k, j));
+            setElem(C_copy2, i, j, getElem(C_copy2, i, j) + getElem(A_copy, i, k) * getElem(A_copy, k, j));
           }
-          setElem(C_copy, i, j, (getElem(C_copy, i, j) * alpha));
+          setElem(C_copy2, i, j, (getElem(C_copy2, i, j) * alpha));
         }
       }
+
+      // printf("fim \n");
 
       // char buf[1024];
       // char ibuf[512];
@@ -382,8 +411,11 @@ init_array (ni, nj, &alpha, &beta);
 
       mtype = FROM_WORKER;
       MPI_Send(&offset, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);
+      // printf("send 1\n");
       MPI_Send(&rows, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);
-      MPI_Send(&C_copy->elementos[offset*C_copy->tam], rows*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);
+      // printf("send 2\n");
+      MPI_Send(&C_copy2->elementos[offset*C_copy2->tam], rows*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);
+      // printf("send 3\n");
 
       // printf("%d\n", (int) A);
 
