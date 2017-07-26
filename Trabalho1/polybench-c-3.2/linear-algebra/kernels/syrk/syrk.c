@@ -93,11 +93,14 @@ int main(int argc, char** argv)
   POLYBENCH_2D_ARRAY_DECL(C,DATA_TYPE,NI,NI,ni,ni);
   POLYBENCH_2D_ARRAY_DECL(A,DATA_TYPE,NI,NJ,ni,nj);
 
+  /* Start total timer. */
+  polybench_start_instruments;
+
   /* Initialize array(s). */
   init_array (ni, nj, &alpha, &beta, POLYBENCH_ARRAY(C), POLYBENCH_ARRAY(A));
 
   /* Start timer. */
-  polybench_start_instruments;
+  // polybench_start_instruments;
 
   /* Run kernel. */
   kernel_syrk (ni, nj, alpha, beta, POLYBENCH_ARRAY(C), POLYBENCH_ARRAY(A));

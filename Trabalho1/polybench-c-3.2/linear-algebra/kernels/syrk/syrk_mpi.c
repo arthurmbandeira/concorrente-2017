@@ -42,7 +42,7 @@ void setElem(Matriz *mat, int lin, int col, DATA_TYPE val){
     mat->elementos[lin*mat->tam + col] = val;
 }
 
-Matriz *A, *A_copy, *C, *C_copy, *C_copy2;
+Matriz *A, *A_copy, *C, *C_copy, *C_copy2, *C_copy3;
 
 
 /* Array initialization. */
@@ -100,7 +100,7 @@ Matriz *A, *A_copy, *C, *C_copy, *C_copy2;
 // }
 
 static
-void init_array_master(int ni, int nj, DATA_TYPE *alpha, DATA_TYPE *beta) {
+void init_array(int ni, int nj, DATA_TYPE *alpha, DATA_TYPE *beta) {
   int i, j;
 
   *alpha = 32412;
@@ -239,7 +239,7 @@ if (numtasks < 2 ) {
   printf("Need at least two MPI tasks. Quitting...\n");
   MPI_Abort(MPI_COMM_WORLD, rc);
   exit(1);
-  }
+}
 numworkers = numtasks-1;
 
 // init_array (ni, nj, &alpha, &beta);
@@ -251,7 +251,7 @@ numworkers = numtasks-1;
       // printf("syrk_mpi has started with %d tasks.\n",numtasks);
       // printf("Initializing arrays...\n");
       // print_array(NI);
-     init_array_master(ni, nj, &alpha, &beta);
+     init_array(ni, nj, &alpha, &beta);
 
       /* Send matrix data to the worker tasks */
       averow = NI/numworkers;
@@ -263,9 +263,9 @@ numworkers = numtasks-1;
       int end = data_division * (taskid + 1);*/
       mtype = FROM_MASTER;
 
-      for (i = 0; i < NI; i++)
-        for (j = 0; j < NI; j++)
-          setElem(C, i, j, (getElem(C, i, j) * beta));
+      // for (i = 0; i < NI; i++)
+      //   for (j = 0; j < NI; j++)
+      //     setElem(C, i, j, (getElem(C, i, j) * beta));
           
 
       /*printf("%d, %d\n", ni, numworkers);
@@ -287,6 +287,7 @@ numworkers = numtasks-1;
          // mat->elementos[lin*mat->tam + col];
          MPI_Send(&A->elementos[0], NI*NI, MPI_DOUBLE, dest, mtype, MPI_COMM_WORLD);
          // printf("ok\n");
+         MPI_Send(&C->elementos[offset * C->tam], rows*NI, MPI_DOUBLE, dest, mtype, MPI_COMM_WORLD);
          // double d2 = getElem(B_copy, 0, 0);
          // MPI_Send(&d2, NI*NI, MPI_DOUBLE, dest, mtype, MPI_COMM_WORLD);
          /*MPI_Send(&A, NI*NJ, MPI_DOUBLE, dest, mtype, MPI_COMM_WORLD);*/
@@ -304,7 +305,7 @@ numworkers = numtasks-1;
          MPI_Recv(&rows, 1, MPI_INT, source, mtype, MPI_COMM_WORLD, &status);
 
          // MPI_Recv(&[offset][0], rows*NI, MPI_DOUBLE, source, mtype, MPI_COMM_WORLD, &status);
-         MPI_Recv(&C_copy->elementos[offset*C_copy->tam], rows*NI, MPI_DOUBLE, source, mtype, MPI_COMM_WORLD, &status);
+         MPI_Recv(&C->elementos[offset*C->tam], rows*NI, MPI_DOUBLE, source, mtype, MPI_COMM_WORLD, &status);
          // printf("Received results from task %d\n",source);
 
         //  if (source == 5)
@@ -322,9 +323,9 @@ numworkers = numtasks-1;
 
 
 
-      for (i = 0; i < NI; i++)
-        for (j = 0; j < NI; j++)
-          setElem(C, i, j, getElem(C, i, j) + getElem(C_copy, i, j));
+      // for (i = 0; i < NI; i++)
+      //   for (j = 0; j < NI; j++)
+      //     setElem(C, i, j, getElem(C, i, j) + getElem(C_copy, i, j));
           // C[i][j] *= beta;
 
       /* Print results */
@@ -348,23 +349,32 @@ numworkers = numtasks-1;
         
       A_copy = novaMatriz(ni);
       C_copy2 = novaMatriz(ni);
+      C_copy3 = novaMatriz(ni);
 
 
       mtype = FROM_MASTER;
 
       MPI_Recv(&offset, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD, &status);
       MPI_Recv(&rows, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD, &status);
-      // printf("%p\n", A);
+      
       MPI_Recv(&A_copy->elementos[0], NI*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
+      MPI_Recv(&C_copy2->elementos[offset*C_copy2->tam], rows*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
       // MPI_Recv(&B_copy, NI*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD, &status);
 
       // printf("%d %d\n", rows, offset);
       // printf("%d %d\n", taskid, NI);
       // for (i = 0; i < rows; i++){
       //   for (j = 0; j < NI; j++){
-      //     printf("%lf ", getElem(A_copy, i, j));
+      //     printf("%lf ", getElem(C_copy2, i, j));
       //   }
       // }
+
+      for (i = offset; i < rows + offset; i++){
+        // printf("%d\n", i);
+        for (j = 0; j < NI; j++){
+          setElem(C_copy2, i, j, (getElem(C_copy2, i, j) * beta));
+        }
+      }
 
 
       // printf("matriz recebida \n");
@@ -372,13 +382,17 @@ numworkers = numtasks-1;
       for (i = offset; i < rows + offset; i++){
         // printf("%d\n", i);
         for (j = 0; j < NI; j++){
-          setElem(C_copy2, i, j, 0.0);
+          // setElem(C_copy3, i, j, 0.0);
           for (k = 0; k < NI; k++){
-            setElem(C_copy2, i, j, getElem(C_copy2, i, j) + getElem(A_copy, i, k) * getElem(A_copy, k, j));
+            setElem(C_copy3, i, j, getElem(C_copy3, i, j) + getElem(A_copy, i, k) * getElem(A_copy, k, j));
           }
-          setElem(C_copy2, i, j, (getElem(C_copy2, i, j) * alpha));
+          setElem(C_copy3, i, j, (getElem(C_copy3, i, j) * alpha));
         }
       }
+
+      for (i = offset; i < rows + offset; i++)
+        for (j = 0; j < NI; j++)
+          setElem(C_copy3, i, j, getElem(C_copy3, i, j) + getElem(C_copy2, i, j));
 
       // printf("fim \n");
 
@@ -414,7 +428,7 @@ numworkers = numtasks-1;
       // printf("send 1\n");
       MPI_Send(&rows, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);
       // printf("send 2\n");
-      MPI_Send(&C_copy2->elementos[offset*C_copy2->tam], rows*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);
+      MPI_Send(&C_copy3->elementos[offset*C_copy3->tam], rows*NI, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);
       // printf("send 3\n");
 
       // printf("%d\n", (int) A);
@@ -437,6 +451,9 @@ numworkers = numtasks-1;
       MPI_Send(&offset, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);
       MPI_Send(&rows, 1, MPI_INT, MASTER, mtype, MPI_COMM_WORLD);*/
       /*MPI_Send(&C, rows*NJ, MPI_DOUBLE, MASTER, mtype, MPI_COMM_WORLD);*/
+      POLYBENCH_FREE_ARRAY(A_copy);
+      POLYBENCH_FREE_ARRAY(C_copy2);
+      POLYBENCH_FREE_ARRAY(C_copy3);
    }
 
 
