@@ -9,15 +9,15 @@ for i in 01 02 03 04 05 06 07 08 09 10 11; do
 # printf "\nTeste Pthread - 1 Thread \n"
 
 printf "\nTeste MPI - 2 Processos \n"
-mpirun -n 2 -hostfile hosts2.txt -N 1 ./syrk_mpi >> results/time2_1.txt
+mpirun -n 3 -hostfile hosts2.txt -N 1 ./syrk_mpi >> results/time_new2.txt
 printf "\nTeste MPI - 4 Processos \n"
-mpirun -n 4 -hostfile hosts2.txt -N 2 ./syrk_mpi >> results/time4_2.txt
+mpirun -n 5 -hostfile hosts2.txt -N 2 ./syrk_mpi >> results/time_new4.txt
 printf "\nTeste MPI - 8 Processos \n"
-mpirun -n 8 -hostfile hosts2.txt -N 3 ./syrk_mpi >> results/time8_3.txt
+mpirun -n 9 -hostfile hosts2.txt -N 3 ./syrk_mpi >> results/time_new8.txt
 printf "\nTeste MPI - 16 Processos \n"
-mpirun -n 16 -hostfile hosts16.txt ./syrk_mpi >> results/time16_8.txt
+mpirun -n 17 -hostfile hosts16.txt ./syrk_mpi >> results/time_new16.txt
 printf "\nTeste MPI - 32 Processos \n"
-mpirun -n 32 -hostfile hosts32.txt ./syrk_mpi >> results/time32_16.txt
+mpirun -n 33 -hostfile hosts32.txt ./syrk_mpi >> results/time_new32.txt
 
 done
 
