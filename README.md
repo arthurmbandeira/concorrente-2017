@@ -10,4 +10,3 @@ Para executar:
 
 Os arquivos do benchmark syrk paralelizados são syrk_openmp, syrk_pthread e syrk_mpi e encontram-se no diretório ```linear-algebra/kernels/syrk/```
 Os scripts para geração dos gráficos do gnuplot encontram-se no diretório ```autorun/gnuplot```
-Os resultados gerados que serviram de base para o artigo estão no diretório ```results_2/```
